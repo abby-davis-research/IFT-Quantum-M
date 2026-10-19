@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const prompt = `Experiment data (JSON):\n${JSON.stringify(experiment).slice(0, 12000)}\n\nQuestion: ${question}`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.8-flash',
       contents: prompt,
       config: { systemInstruction: SYSTEM_PROMPT, maxOutputTokens: 1024 },
     });

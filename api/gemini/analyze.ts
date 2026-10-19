@@ -40,6 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ answer: response.text });
   } catch (err: any) {
     console.error('Gemini error:', err?.message);
-    return res.status(500).json({ error: 'Gemini request failed.' });
+    const diagnostic = (err?.message || 'Gemini request failed.').slice(0, 300);
+    return res.status(500).json({ error: 'Gemini request failed.', diagnostic });
   }
 }

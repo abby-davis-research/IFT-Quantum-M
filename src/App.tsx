@@ -9,6 +9,7 @@ import { FooterAndProvenance } from './components/sections/FooterAndProvenance.t
 import { NotebookModal } from './components/modals/NotebookModal.tsx';
 import { DocModal } from './components/modals/DocModal.tsx';
 import { AwsDeployModal } from './components/modals/AwsDeployModal.tsx';
+import { GeminiAnalystSection } from './components/sections/GeminiAnalystSection.tsx';
 
 export default function App() {
   return (
@@ -30,6 +31,9 @@ export default function App() {
 
           {/* Section 5: Dual-View Benchmark Dashboard (Hardware Noise vs Classiq Optimized) */}
           <BenchmarkDashboardSection />
+
+          {/* Section 6: Gemini Experiment Analyst */}
+          <GeminiAnalystSection />
         </main>
 
         {/* Section 6: Footer and Documentation Links */}

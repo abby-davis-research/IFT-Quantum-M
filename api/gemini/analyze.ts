@@ -37,10 +37,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       config: { systemInstruction: SYSTEM_PROMPT, maxOutputTokens: 1024 },
     });
 
-    return res.status(200).json({ answer: response.text });
+    const text = typeof response.text === 'function' ? (response.text as any)() : response.text;
+    return res.status(200).json({ answer: text || '' });
   } catch (err: any) {
-    console.error('Gemini error:', err?.message);
-    const diagnostic = (err?.message || 'Gemini request failed.').slice(0, 300);
-    return res.status(500).json({ error: 'Gemini request failed.', diagnostic });
+    const status = err?.status || err?.response?.status || err?.code || 'unknown';
+    const msg = (err?.message || 'Gemini request failed.').slice(0, 300);
+    console.error('Gemini error:', status, msg);
+    return res.status(500).json({ error: 'Gemini request failed.', diagnostic: `[${status}] ${msg}` });
   }
 }

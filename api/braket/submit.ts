@@ -12,7 +12,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { BraketClient, CreateQuantumTaskCommand } from '@aws-sdk/client-braket';
 
-const SV1_ARN = 'arn:aws:braket:::device/quantum-simulator/amazon/sv1';
+const DM1_ARN = 'arn:aws:braket:::device/quantum-simulator/amazon/dm1'; // density-matrix simulator: supports noise pragmas (SV1 is state-vector, noiseless-only)
 const RESULTS_BUCKET = 'ift-quantum-lab-artifacts-397450412448';
 const RESULTS_PREFIX = 'braket-results/live-benchmark';
 const QUBITS = 4;
@@ -81,7 +81,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const qasm = buildMirrorQasm(depth, condition === 'noisy', noiseP);
         const out = await client.send(new CreateQuantumTaskCommand({
           action: toAction(qasm),
-          deviceArn: SV1_ARN,
+          deviceArn: DM1_ARN,
           shots,
           outputS3Bucket: RESULTS_BUCKET,
           outputS3KeyPrefix: RESULTS_PREFIX,
@@ -99,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   return res.status(200).json({
-    tasks, shots, noiseP, device: 'SV1',
-    note: 'AWS Braket SV1 state-vector simulator; noisy line uses depolarizing noise pragmas',
+    tasks, shots, noiseP, device: 'DM1',
+    note: 'AWS Braket DM1 density-matrix simulator; noisy line uses depolarizing noise pragmas',
   });
 }

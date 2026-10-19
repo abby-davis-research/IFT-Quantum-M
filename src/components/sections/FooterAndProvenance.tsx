@@ -115,7 +115,7 @@ export const FooterAndProvenance: React.FC = () => {
         {/* Bottom Credits & Theoretical Foundation */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-slate-400 text-[11px] gap-4">
           <p>
-            ift-quantum-circuit-experiment-main • Information Field Theory (IFT) Research Initiative.
+            ift-quantum-circuit-experiment-main • Interplayed Field Theory (IFT) Research Initiative.
           </p>
           <div className="flex items-center gap-4">
             <span>License: Apache 2.0</span>

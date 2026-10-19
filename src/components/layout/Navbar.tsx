@@ -45,7 +45,7 @@ export const Navbar: React.FC = () => {
               </span>
             </div>
             <p className="text-[11px] text-slate-400 hidden sm:block whitespace-nowrap">
-              Information Field Theory &amp; Topological Manifolds
+              Interplayed Field Theory &amp; Topological Manifolds
             </p>
           </div>
         </div>

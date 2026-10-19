@@ -56,7 +56,7 @@ export const DocModal: React.FC = () => {
               </div>
 
               <h2 className="text-lg font-bold text-cyan-300 border-b border-slate-800 pb-2 pt-2">
-                2. Information Field Theory (IFT) Invariants
+                2. Interplayed Field Theory (IFT) Invariants
               </h2>
               <p>
                 Classical field configurations φ(x) are governed by the action Hamiltonian H[φ]. 

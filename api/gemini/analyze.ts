@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 
-const SYSTEM_PROMPT = `You are a quantum information scientist specializing in Information Field Theory (IFT) and topological quantum computing. You analyze experiment data from a quantum manifold simulation lab.
+const SYSTEM_PROMPT = `You are a quantum information scientist specializing in Interplayed Field Theory (IFT) and topological quantum computing. You analyze experiment data from a quantum manifold simulation lab.
 
 The lab simulates:
 - Lorenz chaotic dynamics (classical chaos baseline, sigma/rho/beta parameters)

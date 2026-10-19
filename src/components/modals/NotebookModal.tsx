@@ -15,7 +15,7 @@ export const NotebookModal: React.FC = () => {
           cell_type: "markdown",
           metadata: {},
           source: [
-            "# IFT-Quantum: Information Field Theory & Quantum Manifold Experiment\n",
+            "# IFT-Quantum: Interplayed Field Theory & Quantum Manifold Experiment\n",
             "This notebook demonstrates the mapping from classical Lorenz chaos to a high-genus quantum manifold using Classiq and Qiskit.\n"
           ]
         },
@@ -120,7 +120,7 @@ export const NotebookModal: React.FC = () => {
               Markdown Cell [1]
             </div>
             <h4 className="text-sm font-bold text-cyan-300 mb-2 font-sans">
-              # Information Field Theory (IFT) to High-Genus Quantum Circuit
+              # Interplayed Field Theory (IFT) to High-Genus Quantum Circuit
             </h4>
             <p className="text-slate-300 font-sans leading-relaxed text-xs">
               This experiment demonstrates how classical chaotic systems (Lorenz attractor) are translated into high-genus Riemannian manifolds ($\Sigma_g$, $g=2$). 
@@ -154,7 +154,7 @@ params = {"sigma": 10.0, "rho": 28.0, "beta": 8/3}
 trajectory = simulate_lorenz_trajectory(**params, dt=0.01, steps=2000)
 print(f"Generated {len(trajectory)} phase space coordinates.")
 
-# Step 2: Information Field Theory Riemannian Metric Mapping
+# Step 2: Interplayed Field Theory Riemannian Metric Mapping
 manifold = build_genus2_manifold(
     qubit_count=36,
     adaptive_reweaving=True,

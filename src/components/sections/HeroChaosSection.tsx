@@ -33,7 +33,7 @@ export const HeroChaosSection: React.FC = () => {
           </h1>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
             In non-linear atmospheric convection, classical trajectories wander unpredictably across strange attractors. 
-            Information Field Theory (IFT) generalizes chaotic dynamical systems into probabilistic quantum field states, 
+            Interplayed Field Theory (IFT) generalizes chaotic dynamical systems into probabilistic quantum field states, 
             where topological manifolds protect quantum information from local thermal decoherence.
           </p>
         </div>

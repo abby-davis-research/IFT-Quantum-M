@@ -151,7 +151,7 @@ export const BenchmarkDashboardSection: React.FC = () => {
             {liveSeries ? (
               <span className="px-3 py-1.5 rounded-full bg-emerald-950/70 border border-emerald-700/60 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                LIVE: AWS Braket SV1{liveMeta ? ` · ${liveMeta.shots} shots · noise p=${liveMeta.noiseP}` : ''}
+                LIVE: AWS Braket DM1{liveMeta ? ` · ${liveMeta.shots} shots · noise p=${liveMeta.noiseP}` : ''}
               </span>
             ) : (
               <span className="px-3 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-xs font-mono text-slate-400">
@@ -164,7 +164,7 @@ export const BenchmarkDashboardSection: React.FC = () => {
                 className="px-3.5 py-2 rounded-xl bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-200 font-mono text-xs flex items-center gap-2 transition"
               >
                 <Zap className="w-4 h-4 text-cyan-300" />
-                <span>Run live on Braket SV1</span>
+                <span>Run live on Braket DM1</span>
               </button>
             ) : liveStatus === 'done' ? (
               <button
@@ -176,7 +176,7 @@ export const BenchmarkDashboardSection: React.FC = () => {
             ) : (
               <span className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-mono text-xs flex items-center gap-2">
                 <span className="w-3 h-3 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-                <span>{liveStatus === 'submitting' ? 'Submitting 12 quantum tasks…' : 'SV1 executing… (polling)'}</span>
+                <span>{liveStatus === 'submitting' ? 'Submitting 12 quantum tasks…' : 'DM1 executing… (polling)'}</span>
               </span>
             )}
             <button
@@ -195,7 +195,7 @@ export const BenchmarkDashboardSection: React.FC = () => {
           {liveSeries && (
             <p className="mt-3 text-[11px] font-mono text-slate-500">
               Mirror-circuit fidelity P(|0000⟩) vs depth · 4 qubits · depolarizing noise p={liveMeta?.noiseP} on the raw line ·
-              ideal line is the same circuit without noise · simulator: braket SV1 (state-vector, us-east-1)
+              ideal line is the same circuit without noise · simulator: braket DM1 (density-matrix, us-east-1)
             </p>
           )}
         </div>

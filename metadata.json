@@ -1,0 +1,6 @@
+{
+  "name": "IFT-Quantum Experiment Lab",
+  "description": "Interactive visual narrative and simulation dashboard for Information Field Theory and Quantum Manifolds, featuring 3D Lorenz chaos, adaptive manifold re-weaving, topological data analysis, and benchmark comparisons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

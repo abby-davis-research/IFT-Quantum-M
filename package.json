@@ -24,7 +24,8 @@
     "vite": "^8.3.0",
     "@aws-sdk/client-s3": "^3.879.0",
     "@aws-sdk/client-sts": "^3.879.0",
-    "@aws-sdk/client-cloudformation": "^3.879.0"
+    "@aws-sdk/client-cloudformation": "^3.879.0",
+    "@aws-sdk/client-braket": "^3.879.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

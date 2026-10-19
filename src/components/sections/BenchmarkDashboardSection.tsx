@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useExperiment } from '../../context/ExperimentContext.tsx';
 import { calculateOptimizationGain } from '../../simulation/quantum.ts';
+import type { BenchmarkMetrics } from '../../types/ift.ts';
+import { submitLiveBenchmark, pollLiveBenchmark, type LiveTask, type LiveResult } from '../../lib/api.ts';
 import {
   BarChart3,
   TrendingDown,
@@ -11,6 +13,7 @@ import {
   Cpu,
   Layers,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 
 export const BenchmarkDashboardSection: React.FC = () => {
@@ -25,8 +28,85 @@ export const BenchmarkDashboardSection: React.FC = () => {
   const [activeMetricTab, setActiveMetricTab] = useState<'fidelity' | 'entropy' | 'syndrome'>('fidelity');
   const [showJsonInspector, setShowJsonInspector] = useState(false);
 
-  const gain = calculateOptimizationGain(benchmarkSeries);
-  const currentMetric = benchmarkSeries[Math.min(selectedStep, benchmarkSeries.length - 1)];
+  // Live Braket benchmark state
+  const [liveSeries, setLiveSeries] = useState<BenchmarkMetrics[] | null>(null);
+  const [liveStatus, setLiveStatus] = useState<'idle' | 'submitting' | 'running' | 'done' | 'error'>('idle');
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const [liveMeta, setLiveMeta] = useState<{ shots: number; noiseP: number; taskCount: number } | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const displaySeries = liveSeries || benchmarkSeries;
+
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
+
+  const toBenchmarkMetrics = (results: LiveResult[]): BenchmarkMetrics[] => {
+    const byDepth = new Map<number, { noisy?: number; ideal?: number }>();
+    for (const r of results) {
+      if (r.fidelity == null) continue;
+      const e = byDepth.get(r.depth) || {};
+      if (r.condition === 'noisy') e.noisy = r.fidelity;
+      else e.ideal = r.fidelity;
+      byDepth.set(r.depth, e);
+    }
+    return [...byDepth.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([depth, e], i) => {
+        const hw = e.noisy ?? 0;
+        const opt = e.ideal ?? 0;
+        return {
+          timestamp: Date.now() + i,
+          depth,
+          hardwareFidelity: hw,
+          optimizedFidelity: opt,
+          hardwareEntropy: Math.min(1, (1 - hw) * 1.4),
+          optimizedEntropy: Math.min(1, (1 - opt) * 1.4),
+          syndromeRateHardware: Math.min(0.95, (1 - hw) * 1.1),
+          syndromeRateOptimized: Math.max(0.005, (1 - opt) * 1.1),
+        };
+      });
+  };
+
+  const runLiveBenchmark = async () => {
+    setLiveStatus('submitting');
+    setLiveError(null);
+    try {
+      const { tasks, shots, noiseP } = await submitLiveBenchmark();
+      setLiveMeta({ shots, noiseP, taskCount: tasks.length });
+      setLiveStatus('running');
+      const pollOnce = async () => {
+        try {
+          const { complete, results } = await pollLiveBenchmark(tasks);
+          const done = results.filter((r) => r.status === 'COMPLETED' && r.fidelity != null);
+          if (done.length > 0) setLiveSeries(toBenchmarkMetrics(results));
+          if (complete) {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setLiveSeries(toBenchmarkMetrics(results));
+            setLiveStatus('done');
+          }
+        } catch (e: any) {
+          if (pollRef.current) clearInterval(pollRef.current);
+          setLiveStatus('error');
+          setLiveError(String(e?.message || e).slice(0, 200));
+        }
+      };
+      await pollOnce();
+      pollRef.current = setInterval(pollOnce, 12000);
+    } catch (e: any) {
+      setLiveStatus('error');
+      setLiveError(String(e?.message || e).slice(0, 200));
+    }
+  };
+
+  const resetToIllustrative = () => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    setLiveSeries(null);
+    setLiveStatus('idle');
+    setLiveError(null);
+    setLiveMeta(null);
+  };
+
+  const gain = calculateOptimizationGain(displaySeries);
+  const currentMetric = displaySeries[Math.min(selectedStep, displaySeries.length - 1)];
 
   // Chart coordinates calculation for SVG
   const width = 640;
@@ -36,17 +116,17 @@ export const BenchmarkDashboardSection: React.FC = () => {
   const plotHeight = height - padding * 2;
 
   // Build SVG path data for benchmark curves
-  const getPoints = (getValue: (m: typeof benchmarkSeries[0]) => number) => {
-    return benchmarkSeries.map((m, i) => {
-      const x = padding + (i / (benchmarkSeries.length - 1)) * plotWidth;
+  const getPoints = (getValue: (m: BenchmarkMetrics) => number) => {
+    return displaySeries.map((m, i) => {
+      const x = padding + (i / (displaySeries.length - 1)) * plotWidth;
       const val = getValue(m);
       const y = padding + (1 - val) * plotHeight;
       return `${x},${y}`;
     }).join(' ');
   };
 
-  const hwPoints = getPoints(m => activeMetricTab === 'fidelity' ? m.hardwareFidelity : activeMetricTab === 'entropy' ? m.hardwareEntropy : m.syndromeRateHardware);
-  const optPoints = getPoints(m => activeMetricTab === 'fidelity' ? m.optimizedFidelity : activeMetricTab === 'entropy' ? m.optimizedEntropy : m.syndromeRateOptimized);
+  const hwPoints = getPoints((m: BenchmarkMetrics) => activeMetricTab === 'fidelity' ? m.hardwareFidelity : activeMetricTab === 'entropy' ? m.hardwareEntropy : m.syndromeRateHardware);
+  const optPoints = getPoints((m: BenchmarkMetrics) => activeMetricTab === 'fidelity' ? m.optimizedFidelity : activeMetricTab === 'entropy' ? m.optimizedEntropy : m.syndromeRateOptimized);
 
   return (
     <section id="benchmark-section" className="py-14 lg:py-20 border-b border-slate-900 bg-slate-950">
@@ -67,7 +147,38 @@ export const BenchmarkDashboardSection: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {liveSeries ? (
+              <span className="px-3 py-1.5 rounded-full bg-emerald-950/70 border border-emerald-700/60 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                LIVE: AWS Braket SV1{liveMeta ? ` · ${liveMeta.shots} shots · noise p=${liveMeta.noiseP}` : ''}
+              </span>
+            ) : (
+              <span className="px-3 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-xs font-mono text-slate-400">
+                Illustrative preview — scripted curves
+              </span>
+            )}
+            {liveStatus === 'idle' || liveStatus === 'error' ? (
+              <button
+                onClick={runLiveBenchmark}
+                className="px-3.5 py-2 rounded-xl bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-200 font-mono text-xs flex items-center gap-2 transition"
+              >
+                <Zap className="w-4 h-4 text-cyan-300" />
+                <span>Run live on Braket SV1</span>
+              </button>
+            ) : liveStatus === 'done' ? (
+              <button
+                onClick={resetToIllustrative}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-mono text-xs flex items-center gap-2 transition"
+              >
+                <span>Back to illustrative</span>
+              </button>
+            ) : (
+              <span className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-mono text-xs flex items-center gap-2">
+                <span className="w-3 h-3 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                <span>{liveStatus === 'submitting' ? 'Submitting 12 quantum tasks…' : 'SV1 executing… (polling)'}</span>
+              </span>
+            )}
             <button
               onClick={() => setShowJsonInspector(!showJsonInspector)}
               className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono text-xs flex items-center gap-2 transition"
@@ -76,6 +187,17 @@ export const BenchmarkDashboardSection: React.FC = () => {
               <span>{showJsonInspector ? 'Hide Config JSON' : 'Inspect Config JSON'}</span>
             </button>
           </div>
+          {liveError && (
+            <div className="mt-3 px-4 py-2.5 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-200 font-mono text-xs">
+              Live run failed: {liveError}
+            </div>
+          )}
+          {liveSeries && (
+            <p className="mt-3 text-[11px] font-mono text-slate-500">
+              Mirror-circuit fidelity P(|0000⟩) vs depth · 4 qubits · depolarizing noise p={liveMeta?.noiseP} on the raw line ·
+              ideal line is the same circuit without noise · simulator: braket SV1 (state-vector, us-east-1)
+            </p>
+          )}
         </div>
 
         {/* JSON Inspector Modal or Drawer (Collapsible) */}

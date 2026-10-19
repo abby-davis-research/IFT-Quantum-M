@@ -61,6 +61,15 @@ test('Topological surgery isolates high-noise edges and stitches stabilizers', (
   assert.equal(modifiedEdges.length, edges.length);
 });
 
+test('Topological surgery leaves low-noise adaptive couplers intact', () => {
+  const { edges } = generateQuantumManifold(true, 36);
+  const { modifiedEdges, cutCount, stitchedCount } = executeTopologicalSurgery(edges, 0.008);
+
+  assert.equal(cutCount, 0, 'Adaptive couplers are below the noise threshold');
+  assert.equal(stitchedCount, 1, 'The bridge stabilizer is stitched');
+  assert.ok(modifiedEdges.every(edge => !edge.isCut), 'No adaptive couplers are cut');
+});
+
 test('Euler characteristic and genus prediction are consistent with topology', () => {
   // Genus 2 surface has chi = 2 - 2(2) = -2
   const chi = -2;

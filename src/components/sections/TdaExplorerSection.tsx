@@ -86,7 +86,11 @@ export const TdaExplorerSection: React.FC = () => {
               {surgeryResults && !isPerformingSurgery && (
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-xl bg-emerald-950/90 border border-emerald-500/80 shadow-2xl backdrop-blur-md flex items-center gap-2 text-xs font-mono text-emerald-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Surgery Complete: Excised {surgeryResults.cutCount} high-noise couplers • Stitched {surgeryResults.stitchedCount} boundary stabilizers</span>
+                  <span>
+                    {surgeryResults.cutCount === 0
+                      ? `No high-noise couplers found; stitched ${surgeryResults.stitchedCount} boundary stabilizers`
+                      : `Surgery Complete: Excised ${surgeryResults.cutCount} high-noise couplers • Stitched ${surgeryResults.stitchedCount} boundary stabilizers`}
+                  </span>
                 </div>
               )}
             </div>

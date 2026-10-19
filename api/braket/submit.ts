@@ -86,7 +86,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           outputS3Bucket: RESULTS_BUCKET,
           outputS3KeyPrefix: RESULTS_PREFIX,
           clientToken: `ift-live-${Date.now()}-${depth}-${condition}`.slice(0, 64),
-          tags: { project: 'ift-quantum-m', condition, depth: String(depth) },
         }));
         tasks.push({ depth, condition, taskArn: out.quantumTaskArn || '' });
       }
